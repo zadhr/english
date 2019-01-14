@@ -47,6 +47,11 @@ class UserinfoController extends Controller
 //        ]);
 //    }
 
+    /**
+     * 微信登录
+     * @param Request $post
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function wx_login(Request $post){
         $dataGet=$post->all();
         $res=$this->handle->wxlogin($dataGet['code'],$dataGet['encryptedData'],$dataGet['iv'],$this->appId,$this->appSecret);
