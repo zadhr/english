@@ -7,8 +7,8 @@ use App\Module\user;
 
 class UserinfoController extends Controller
 {
-    private $appId='wx30e4351e3fab2266';
-    private $appSecret='efccfa22b12b1dbf63381e7ebbe81a87';
+    private $appId='';
+    private $appSecret='';
 
     private $handle;
 
