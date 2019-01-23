@@ -343,7 +343,7 @@ trait QuestionHandle
         }else{
             $correct_answer = DB::table('book_question')
                 ->where('id', $id)
-                ->value('w_trans');
+                ->value('word');
         }
 
         if($type==1){
@@ -568,10 +568,10 @@ trait QuestionHandle
             ->get();
         $answer=DB::table('book_question')->where('id',$id)->value('word');
 
-        $tid=DB::table('book_choice')->where('id',$id)->value('tid');
-        $sid=DB::table('book_choice')->where('id',$id)->value('sid');
+        $tid=DB::table('book_question')->where('id',$id)->value('tid');
+        $sid=DB::table('book_question')->where('id',$id)->value('sid');
         $data=$data[0];
-        $data->answer=$answer;
+        $data->word=$answer;
         $unit=DB::table('book_system')->where('id',$sid)->value('unit');
         $title=DB::table('book_title')->where('id',$tid)->value('name');
 

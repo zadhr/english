@@ -301,10 +301,10 @@ class BookController extends Controller
         $sid=$request->get('sid');
         $type=$request->get('type');
         $answer=$request->get('answer');
-//        $answer[0]['id']=2;
-//        $answer[0]['answer']=1;
-//        $answer[1]['id']=9;
-//        $answer[1]['answer']=1;
+//        $answer[0]['id']=1;
+//        $answer[0]['answer']='success';
+//        $answer[1]['id']=2;
+//        $answer[1]['answer']='fail';
         $now=time();
 
         $openid=$this->handle->token_check($token);
@@ -319,6 +319,7 @@ class BookController extends Controller
         for ($i = 0; $i < $len; $i++) {
             $answerSid=$this->handle->sidGet($answer[$i]['id'],$type);
             $check = $this->handle->answer_check($answer[$i]['id'], $answer[$i]['answer'], $type);
+
             if ($check) {
                 $this->handle->correctAnswerUpdate( $uid, $type,$sid);
             } else {
