@@ -13,90 +13,48 @@ use Illuminate\Support\Facades\DB;
 
 trait QuestionHandle
 {
-    public function choice_list($tid,$sid,$page,$limit){
-        $data=DB::table('book_choice')
+    public function question_list($tid,$sid,$page,$limit){
+        $data=DB::table('book_question')
             ->where('tid',$tid)
             ->where('sid',$sid)
             ->limit($limit)
             ->offset(($page - 1) * $limit)
-            ->select('id','question','choice1','choice2','choice3','choice4','answer','place','example','trans','a_trans')
+            ->select('id','word','choice1','choice2','choice3','choice4','place','example','trans','w_trans','type')
             ->get();
         return $data;
     }
 
-    public function choice_total($tid,$sid){
-        $total=DB::table('book_choice')
+    public function question_total($tid,$sid){
+        $total=DB::table('book_question')
             ->where('tid',$tid)
             ->where('sid',$sid)
             ->count();
         return $total;
     }
 
-    public function choice_add($data){
-        $res=DB::table('book_choice')
+    public function question_add($data){
+        $res=DB::table('book_question')
             ->insert($data);
         $msg=$res==true?'success':'fail';
         return $msg;
     }
 
-    public function choice_edit($data){
-        $res=DB::table('book_choice')
+    public function question_edit($data){
+        $res=DB::table('book_question')
             ->where('id',$data['id'])
             ->update([
-                'question'=>$data['question'],'choice1'=>$data['choice1'],'choice2'=>$data['choice2'],
-                'choice3'=>$data['choice3'],'choice4'=>$data['choice4'],'answer'=>$data['answer'],
-                'place'=>$data['place'],'example'=>$data['example'],'trans'=>$data['trans'],'a_trans'=>$data['a_trans']
+                'word'=>$data['word'],'choice1'=>$data['choice1'],'choice2'=>$data['choice2'],
+                'choice3'=>$data['choice3'],'choice4'=>$data['choice4'],'place'=>$data['place'],
+                'example'=>$data['example'],'trans'=>$data['trans'],'w_trans'=>$data['w_trans'],'type'=>$data['type']
             ]);
         $msg=$res==true?'success':'fail';
         return $msg;
     }
 
-    public function choice_del($id){
-        $res=DB::table('book_choice')
+    public function question_del($id){
+        $res=DB::table('book_question')
             ->where('id',$id)
             ->delete();
-        $msg=$res==true?'success':'fail';
-        return $msg;
-    }
-
-    public function blank_list($tid,$sid,$page,$limit){
-        $data=DB::table('book_blank')
-            ->where('tid',$tid)
-            ->where('sid',$sid)
-            ->limit($limit)
-            ->offset(($page - 1) * $limit)
-            ->select('id','question','answer','place','example','trans','a_trans')
-            ->get();
-        return $data;
-    }
-
-    public function blank_total($tid,$sid){
-        $data=DB::table('book_blank')
-            ->where('tid',$tid)
-            ->where('sid',$sid)
-            ->count();
-        return $data;
-    }
-
-    public function blank_add($data){
-        $res=DB::table('book_blank')->insert($data);
-        $msg=$res==true?'success':'fail';
-        return $msg;
-    }
-
-    public function blank_edit($data){
-        $res=DB::table('book_blank')
-            ->where('id',$data['id'])
-            ->update([
-                'question'=>$data['question'],'answer'=>$data['answer'],'place'=>$data['place'],
-                'example'=>$data['example'],'trans'=>$data['trans'],'a_trans'=>$data['a_trans']
-            ]);
-        $msg='success';
-        return $msg;
-    }
-
-    public function blank_del($id){
-        $res=DB::table('book_blank')->where('id',$id)->delete();
         $msg=$res==true?'success':'fail';
         return $msg;
     }
@@ -104,43 +62,18 @@ trait QuestionHandle
     public function random($type,$sid,$total,$uid){
 
         if(is_array($sid)){
-            switch($type){
-                case 1:
-                    $question=DB::table('book_choice')
-                        ->whereIn('sid',$sid)
-                        ->orderbyRaw("Rand()")
-                        ->limit($total)
-                        ->pluck('id');
-
-                    break;
-                case 2:
-                    $question=DB::table('book_blank')
-                        ->whereIn('sid',$sid)
-                        ->orderbyRaw("Rand()")
-                        ->limit($total)
-                        ->pluck('id');
-                    break;
-            }
+            $question=DB::table('book_question')
+                ->whereIn('sid',$sid)
+                ->orderbyRaw("Rand()")
+                ->limit($total)
+                ->pluck('id');
             $sid=json_encode($sid);
         }else{
-            switch($type){
-                case 1:
-                    $question=DB::table('book_choice')
-                        ->where('sid',$sid)
-                        ->orderbyRaw("Rand()")
-                        ->limit($total)
-                        ->pluck('id');
-
-                    break;
-                case 2:
-                    $question=DB::table('book_blank')
-                        ->where('sid',$sid)
-                        ->orderbyRaw("Rand()")
-                        ->limit($total)
-                        ->pluck('id');
-
-                    break;
-            }
+            $question=DB::table('book_question')
+                ->where('sid',$sid)
+                ->orderbyRaw("Rand()")
+                ->limit($total)
+                ->pluck('id');
         }
         $question=json_encode($question);
         $check=DB::table('q_list')
@@ -155,7 +88,7 @@ trait QuestionHandle
                 ->where('type',$type)
                 ->update(['qid'=>$question]);
         }else{
-            $res= DB::table('q_list')
+            DB::table('q_list')
                 ->where('uid',$uid)
                 ->insert([
                     'qid'=>$question,'uid'=>$uid,'sid'=>$sid,'type'=>$type
@@ -192,22 +125,23 @@ trait QuestionHandle
             ->where('type',$type)
             ->update(['qid'=>$list]);
         if($type==1){
-            $data=DB::table('book_choice')
-                ->leftJoin('book_system','book_choice.sid','=','book_system.id')
-                ->where('book_choice.id',$qid)
-                ->select('book_system.choice_limit','book_choice.id','book_choice.question',
-                    'book_choice.choice1','book_choice.choice2','book_choice.choice3',
-                    'book_choice.choice4')
+            $data=DB::table('book_question')
+                ->leftJoin('book_system','book_question.sid','=','book_system.id')
+                ->where('book_question.id',$qid)
+                ->select('book_system.choice_limit','book_question.id','book_question.word',
+                    'book_question.choice1','book_question.choice2','book_question.choice3',
+                    'book_question.choice4')
                 ->get();
+            $data[0]->limit=$data[0]->choice_limit;
         }else{
-            $data=DB::table('book_blank')
-                ->leftJoin('book_system','book_blank.sid','=','book_system.id')
-                ->where('book_blank.id',$qid)
-                ->select('book_system.choice_limit','book_blank.id','book_blank.question')
+            $data=DB::table('book_question')
+                ->leftJoin('book_system','book_question.sid','=','book_system.id')
+                ->where('book_question.id',$qid)
+                ->select('book_system.blank_limit','book_question.id','book_question.w_trans')
                 ->get();
+            $data[0]->limit=$data[0]->blank_limit;
         }
         return $data;
-
     }
 
     public function choice_array_total($sid,$threshold){
@@ -379,16 +313,39 @@ trait QuestionHandle
         }
     }
 
+    /**
+     * 对答案
+     * @param $id
+     * @param $answer
+     * @param $type
+     * @return bool
+     */
     public function answer_check($id,$answer,$type){
         if($type==1) {
-            $correct_answer = DB::table('book_choice')
+            $trans = DB::table('book_question')
                 ->where('id', $id)
-                ->value('answer');
+                ->value('w_trans');
+            $choices=DB::table('book_question')
+                ->where('id',$id)
+                ->select('choice1','choice2','choice3','choice4')
+                ->get();
+            if($trans==$choices[0]->choice1){
+                $correct_answer=0;
+            }elseif($trans==$choices[0]->choice2){
+                $correct_answer=1;
+            }elseif($trans==$choices[0]->choice3){
+                $correct_answer=2;
+            }elseif($trans==$choices[0]->choice4){
+                $correct_answer=3;
+            }else{
+                $correct_answer=4;
+            }
         }else{
-            $correct_answer = DB::table('book_blank')
+            $correct_answer = DB::table('book_question')
                 ->where('id', $id)
-                ->value('answer');
+                ->value('w_trans');
         }
+
         if($type==1){
             if($correct_answer==$answer){
                 return true;
@@ -402,14 +359,12 @@ trait QuestionHandle
                 return false;
             }
         }
+
+
     }
 
     public function sidGet($id,$type){
-        if($type==1){
-            $sid=DB::table('book_choice')->where('id',$id)->value('sid');
-        }else{
-            $sid=DB::table('book_blank')->where('id',$id)->value('sid');
-        }
+        $sid=DB::table('book_question')->where('id',$id)->value('sid');
         return $sid;
     }
 
@@ -417,11 +372,8 @@ trait QuestionHandle
         $id=intval($id);
 
         $now=date('Y-m-d H:i:s');
-        if($type==1){
-            $words=DB::table('book_choice')->where('id',$id)->value('question');
-        }else{
-            $words=DB::table('book_blank')->where('id',$id)->value('answer');
-        }
+
+        $words=DB::table('book_question')->where('id',$id)->value('word');
         if(is_array($sid)){
             $sid=json_encode($sid);
         }
@@ -460,6 +412,12 @@ trait QuestionHandle
         return 'success';
     }
 
+    /**
+     * 清除用户答题表
+     * @param $uid
+     * @param $sid
+     * @param $type
+     */
     public function mlistClear($uid,$sid,$type){
         if(is_array($sid)){
             $sid=json_encode($sid);
@@ -556,19 +514,19 @@ trait QuestionHandle
             ->increment('num');
     }
 
-    public function correctAnswerGet($id,$state){
-        if($state==1) {
-            $correct_answer = DB::table('book_choice')
-                ->where('id', $id)
-                ->value('answer');
-            $correct_answer=intval($correct_answer);
-        }else{
-            $correct_answer = DB::table('book_blank')
-                ->where('id', $id)
-                ->value('answer');
-        }
-        return $correct_answer;
-    }
+//    public function correctAnswerGet($id,$state){
+//        if($state==1) {
+//            $correct_answer = DB::table('book_question')
+//                ->where('id', $id)
+//                ->value('');
+//            $correct_answer=intval($correct_answer);
+//        }else{
+//            $correct_answer = DB::table('book_blank')
+//                ->where('id', $id)
+//                ->value('answer');
+//        }
+//        return $correct_answer;
+//    }
 
     public function mistakeGet($uid,$sid,$type){
         if(is_array($sid)){
@@ -581,27 +539,17 @@ trait QuestionHandle
             ->where('type',$type)
             ->value('qid');
         $qid=json_decode($qid);
-        if($type==1){
-            $res=DB::table('book_choice')
-                ->whereIn('id',$qid)
-                ->select('question','id')
-                ->get();
+        $res=DB::table('book_question')
+            ->whereIn('id',$qid)
+            ->select('word','id')
+            ->get();
 
-            foreach ($res as $key=>$val){
-                $data[$key]['id']=$val->id;
-                $data[$key]['words']=$val->question;
-            }
-
-        }else{
-            $res=DB::table('book_blank')
-                ->whereIn('id',$qid)
-                ->select('answer','id')
-                ->get();
-            foreach($res as $key=>$val){
-                $data[$key]['id']=$val->id;
-                $data[$key]['words']=$val->answer;
-            }
+        foreach ($res as $key=>$val){
+            $data[$key]['id']=$val->id;
+            $data[$key]['words']=$val->word;
         }
+
+
         return $data;
     }
 
@@ -611,34 +559,22 @@ trait QuestionHandle
      * @param $type
      * @return mixed
      */
-    public function mistakeFind($id,$type){
-        if($type==1){
-            $data=DB::table('book_choice')
-                ->where('id',$id)
-                ->select('place','example',
-                    'trans','a_trans')
-                ->get();
-            $answer=DB::table('book_choice')->where('id',$id)->value('question');
+    public function mistakeFind($id){
 
-            $tid=DB::table('book_choice')->where('id',$id)->value('tid');
-            $sid=DB::table('book_choice')->where('id',$id)->value('sid');
-            $data=$data[0];
-            $data->answer=$answer;
-            $unit=DB::table('book_system')->where('id',$sid)->value('unit');
-            $title=DB::table('book_title')->where('id',$tid)->value('name');
+        $data=DB::table('book_question')
+            ->where('id',$id)
+            ->select('place','example',
+                'trans','w_trans')
+            ->get();
+        $answer=DB::table('book_question')->where('id',$id)->value('word');
 
-        }else{
-            $data=DB::table('book_blank')
-                ->where('id',$id)
-                ->select('answer','place','example',
-                    'trans','a_trans')
-                ->get();
-            $tid=DB::table('book_blank')->where('id',$id)->value('tid');
-            $sid=DB::table('book_blank')->where('id',$id)->value('sid');
-            $data=$data[0];
-            $unit=DB::table('book_system')->where('id',$sid)->value('unit');
-            $title=DB::table('book_title')->where('id',$tid)->value('name');
-        }
+        $tid=DB::table('book_choice')->where('id',$id)->value('tid');
+        $sid=DB::table('book_choice')->where('id',$id)->value('sid');
+        $data=$data[0];
+        $data->answer=$answer;
+        $unit=DB::table('book_system')->where('id',$sid)->value('unit');
+        $title=DB::table('book_title')->where('id',$tid)->value('name');
+
         $data->place=$title.$unit.$data->place;
         return $data;
     }
@@ -721,21 +657,13 @@ trait QuestionHandle
     public function questionCheck($sid,$type){
         if(is_array($sid)){
             $len=sizeof($sid);
-            switch($type){
-                case 1:
-                    $id=DB::table('book_choice')
-                        ->whereIn('sid',$sid)
-                        ->groupby('sid')
-                        ->select('id')
-                        ->get();
-                    break;
-                case 2:
-                    $id=DB::table('book_blank')
-                        ->whereIn('sid',$sid)
-                        ->groupby('sid')
-                        ->select('id')
-                        ->get();
-            }
+
+            $id=DB::table('book_question')
+                ->whereIn('sid',$sid)
+                ->groupby('sid')
+                ->select('id')
+                ->get();
+
             $idlen=sizeof($id);
             if($len==$idlen){
                 return true;
@@ -743,20 +671,10 @@ trait QuestionHandle
                 return false;
             }
         }else{
-            switch($type){
-                case 1:
-                    $id=DB::table('book_choice')
-                        ->where('sid',$sid)
-                        ->select('id')
-                        ->first();
-                    break;
-                case 2:
-                    $id=DB::table('book_blank')
-                        ->where('sid',$sid)
-                        ->select('id')
-                        ->first();
-
-            }
+            $id=DB::table('book_question')
+                ->where('sid',$sid)
+                ->select('id')
+                ->first();
             if($id){
                 return true;
             }else{
@@ -772,7 +690,7 @@ trait QuestionHandle
                 $num=DB::table('book_system')
                     ->where('id',$sid)
                     ->value('choice_num');
-                $has_num=DB::table('book_choice')
+                $has_num=DB::table('book_question')
                     ->where('sid',$sid)
                     ->count('id');
                 break;
@@ -780,7 +698,7 @@ trait QuestionHandle
                 $num=DB::table('book_system')
                     ->where('id',$sid)
                     ->value('blank_num');
-                $has_num=DB::table('book_blank')
+                $has_num=DB::table('book_question')
                     ->where('sid',$sid)
                     ->count('id');
                 break;
@@ -822,17 +740,12 @@ trait QuestionHandle
     }
 
     public function unitDone($uid,$tid){
-        $choicelen=DB::table('book_choice')
+        $questionLen=DB::table('book_question')
             ->where('tid',$tid)
             ->groupby('sid')
             ->select('id')
             ->get();
-        $blanklen=DB::table('book_blank')
-            ->where('tid',$tid)
-            ->groupby('sid')
-            ->select('id')
-            ->get();
-        $len=sizeof($choicelen)+sizeof($blanklen);
+        $len=sizeof($questionLen)*2;
         $done=DB::table('unit_score')
             ->where('uid',$uid)
             ->where('tid',$tid)

@@ -29,6 +29,12 @@ trait BookHandle
             ->offset(($page - 1) * $limit)
             ->select('book_title.id','book_title.name','grade.grade')
             ->get();
+        foreach($data as $value){
+            $value->gid=DB::table('grade')
+                ->where('grade',$value->grade)
+                ->value('id');
+        }
+
         return $data;
     }
 
@@ -121,16 +127,8 @@ trait BookHandle
         return $data;
     }
 
-    public function book_unit_choice($tid,$sid){
-        $count=DB::table('book_choice')
-            ->where('tid',$tid)
-            ->where('sid',$sid)
-            ->count();
-        return $count;
-    }
-
-    public function book_unit_blank($tid,$sid){
-        $count=DB::table('book_blank')
+    public function book_unit_question($tid,$sid){
+        $count=DB::table('book_question')
             ->where('tid',$tid)
             ->where('sid',$sid)
             ->count();
@@ -165,8 +163,6 @@ trait BookHandle
         $msg=$res==true?'success':'fail';
         return $msg;
     }
-
-
 
     public function unitGet($tid){
         $unit=DB::table('book_system')

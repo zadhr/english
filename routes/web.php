@@ -60,15 +60,15 @@ Route::post('title/unit','BookController@book_unit_add');
 Route::put('title/unit','BookController@book_unit_edit');
 Route::delete('title/unit','BookController@book_unit_del');
 
-Route::get('title/unit/choice','BookController@choice_list');
-Route::post('title/unit/choice','BookController@choice_add');
-Route::put('title/unit/choice','BookController@choice_edit');
-Route::delete('title/unit/choice','BookController@choice_del');
+Route::get('title/unit/question','BookController@question_list');
+Route::post('title/unit/question','BookController@question_add');
+Route::put('title/unit/question','BookController@question_edit');
+Route::delete('title/unit/question','BookController@question_del');
 
-Route::get('title/unit/blank','BookController@blank_list');
-Route::post('title/unit/blank','BookController@blank_add');
-Route::put('title/unit/blank','BookController@blank_edit');
-Route::delete('title/unit/blank','BookController@blank_del');
+//Route::get('title/unit/blank','BookController@blank_list');
+//Route::post('title/unit/blank','BookController@blank_add');
+//Route::put('title/unit/blank','BookController@blank_edit');
+//Route::delete('title/unit/blank','BookController@blank_del');
 
 Route::get('task','BookController@task_list');
 Route::post('task','BookController@task_add');

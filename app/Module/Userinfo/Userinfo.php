@@ -112,7 +112,7 @@ trait UserinfoHandle
                 ->update([
                     'pic' => $data['pic'], 'nickname' => $data['nickname'], 'grade' => $data['grade']
                     , 'phone' => $data['phone'], 'sex' => $data['sex'], 'address' => $data['address'],
-                   'name' => $data['name'],'identity'=>$data['identity']
+                    'name' => $data['name'],'identity'=>$data['identity']
                 ]);
         }
         $msg='success';
@@ -152,7 +152,7 @@ trait UserinfoHandle
     }
 
     public function mistake_add($uid,$mistake){
-       $now=date('Y-m-d H:i:s');
+        $now=date('Y-m-d H:i:s');
         $res=DB::table('mistake')->insert([
             'uid'=>$uid,'words'=>$mistake,'date'=>$now,'state'=>2
         ]);
@@ -161,45 +161,26 @@ trait UserinfoHandle
     }
 
     public function mistake_find($id){
-        $array=array();
-        $array1=array();
         $mistake=DB::table('mistake')
             ->where('id',$id)
             ->value('words');
         $sid=DB::table('mistake')
             ->where('id',$id)
             ->value('sid');
-        $type=DB::table('mistake')
-            ->where('id',$id)
-            ->value('type');
+
         $unit=DB::table('book_system')->where('id',$sid)->value('unit');
         $tid=DB::table('book_system')->where('id',$sid)->value('tid');
         $title=DB::table('book_title')->where('id',$tid)->value('name');
-        if($type==2) {
-            $data = DB::table('book_blank')
-                ->where('sid',$sid)
-                ->where('answer', 'like', '%' . $mistake . '%')
-                ->select('place', 'example', 'trans','a_trans','answer','id')
-                ->first();
-            if(!$data){
-                return false;
-            }
 
-        }else{
-            $data=DB::table('book_choice')
-                ->where('sid',$sid)
-                ->where('question','like','%'.$mistake.'%')
-                ->select('place','example','trans','a_trans','id')
-                ->first();
-            if(!$data){
-                return false;
-            }
-            $answer=DB::table('book_choice')
-                ->where('id',$data->id)
-                ->value('question');
-            $data->answer=$answer;
-
+        $data = DB::table('book_question')
+            ->where('sid',$sid)
+            ->where('word', 'like', '%' . $mistake . '%')
+            ->select('place', 'example', 'trans','w_trans','word','id','type')
+            ->first();
+        if(!$data){
+            return false;
         }
+
         $data->place=$title.$unit.$data->place;
         return $data;
     }
@@ -212,21 +193,14 @@ trait UserinfoHandle
     }
 
     public function user_mistake_add($id,$type,$uid,$now){
-          if($type==1){
-              $sid=DB::table('book_choice')
-                  ->where('id',$id)
-                  ->value('sid');
-              $words=DB::table('book_choice')
-                  ->where('id',$id)
-                  ->value('question');
-          }else{
-              $sid=DB::table('book_blank')
-                  ->where('id',$id)
-                  ->value('sid');
-              $words=DB::table('book_blank')
-                  ->where('id',$id)
-                  ->value('answer');
-          }
+
+        $sid=DB::table('book_question')
+            ->where('id',$id)
+            ->value('sid');
+        $words=DB::table('book_question')
+            ->where('id',$id)
+            ->value('word');
+
         DB::table('mistake')->insert([
             'uid'=>$uid,'words'=>$words,'sid'=>$sid,'type'=>$type,'date'=>$now,'state'=>2
         ]);

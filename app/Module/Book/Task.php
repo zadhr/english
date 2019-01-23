@@ -77,24 +77,22 @@ trait TaskHandle
         }
     }
 
+    /**
+     * 任务随机出题
+     * @param $type
+     * @param $sid
+     * @param $total
+     * @param $uid
+     * @param $kid
+     * @return string
+     */
     public function taskRandom($type,$sid,$total,$uid,$kid){
-        switch($type){
-            case 1:
-                $question=DB::table('book_choice')
-                    ->whereIn('sid',$sid)
-                    ->orderbyRaw("Rand()")
-                    ->limit($total)
-                    ->pluck('id');
 
-                break;
-            case 2:
-                $question=DB::table('book_blank')
-                    ->whereIn('sid',$sid)
-                    ->orderbyRaw("Rand()")
-                    ->limit($total)
-                    ->pluck('id');
-                break;
-        }
+        $question=DB::table('book_question')
+            ->whereIn('sid',$sid)
+            ->orderbyRaw("Rand()")
+            ->limit($total)
+            ->pluck('id');
         $sid=json_encode($sid);
         $question=json_encode($question);
         $check=DB::table('q_tlist')
@@ -196,19 +194,19 @@ trait TaskHandle
             ->where('kid',$kid)
             ->update(['qid'=>$qid]);
         if($type==1){
-            $data=DB::table('book_choice')
-                ->leftJoin('book_system','book_choice.sid','=','book_system.id')
-                ->where('book_choice.id',$id)
-                ->select('book_choice.id','book_choice.question',
-                    'book_choice.choice1','book_choice.choice2','book_choice.choice3',
-                    'book_choice.choice4')
+            $data=DB::table('book_question')
+                ->where('id',$id)
+                ->select('id','choice1','choice2','choice3', 'choice4')
                 ->get();
+            $data[0]->question=DB::table('book_question')
+                ->where('id',$id)
+                ->value('word');
         }else{
-            $data=DB::table('book_blank')
-                ->leftJoin('book_system','book_blank.sid','=','book_system.id')
-                ->where('book_blank.id',$id)
-                ->select('book_blank.id','book_blank.question')
+            $data=DB::table('book_question')
+                ->where('id',$id)
+                ->select('id','w_trans')
                 ->get();
+            $data[0]->question=$data[0]->w_trans;
         }
         $data[0]->limit=DB::table('task')
             ->where('id',$kid)
@@ -226,11 +224,7 @@ trait TaskHandle
     public function taskMistakeAdd($id,$uid,$kid,$sid,$type){
         $id=intval($id);
         $now=date('Y-m-d H:i:s');
-        if($type==1){
-            $words=DB::table('book_choice')->where('id',$id)->value('question');
-        }else{
-            $words=DB::table('book_blank')->where('id',$id)->value('answer');
-        }
+        $words=DB::table('book_question')->where('id',$id)->value('word');
 
         $is_check=DB::table('mistake')
             ->where('uid',$uid)
@@ -286,13 +280,13 @@ trait TaskHandle
     }
 
     public function taskScoreSet($uid,$kid){
-         $total=DB::table('task')
-             ->where('id',$kid)
-             ->value('num');
-         $num=DB::table('task_score')
-             ->where('uid',$uid)
-             ->where('kid',$kid)
-             ->value('num');
+        $total=DB::table('task')
+            ->where('id',$kid)
+            ->value('num');
+        $num=DB::table('task_score')
+            ->where('uid',$uid)
+            ->where('kid',$kid)
+            ->value('num');
         if($total==$num){
             $fullPoint=DB::table('point_get')
                 ->where('id',2)
@@ -305,7 +299,7 @@ trait TaskHandle
                 ->where('id',$uid)
                 ->update(['point'=>$point]);
         }
-         $score=number_format($num/$total*100,1);
+        $score=number_format($num/$total*100,1);
         DB::table('task_score')
             ->where('uid',$uid)
             ->where('kid',$kid)
@@ -345,7 +339,7 @@ trait TaskHandle
         return $time;
     }
 
-    public function taskMistakeGet($uid,$kid,$type)
+    public function taskMistakeGet($uid,$kid)
     {
         $qid = DB::table('m_tlist')
             ->where('uid', $uid)
@@ -353,25 +347,15 @@ trait TaskHandle
             ->value('qid');
         $qid = json_decode($qid);
         $data=array();
-        if ($type == 1) {
-            $answer = DB::table('book_choice')
-                ->whereIn('id', $qid)
-                ->select('question', 'id')
-                ->get();
-            foreach ($answer as $key => $value) {
-                $data[$key]['id'] = $value->id;
-                $data[$key]['words'] = $value->question;
-            }
-        } else {
-            $res = DB::table('book_blank')
-                ->whereIn('id', $qid)
-                ->select('answer', 'id')
-                ->get();
-            foreach ($res as $key => $val) {
-                $data[$key]['id'] = $val->id;
-                $data[$key]['words'] = $val->answer;
-            }
+        $answer = DB::table('book_question')
+            ->whereIn('id', $qid)
+            ->select('word', 'id')
+            ->get();
+        foreach ($answer as $key => $value) {
+            $data[$key]['id'] = $value->id;
+            $data[$key]['words'] = $value->question;
         }
+
         return $data;
     }
 }

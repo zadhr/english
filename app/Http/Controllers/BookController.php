@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class BookController extends Controller
 {
     private $handle;
-    private $threshold=30;
+    private $threshold=30;   //默认出题总数
 
     public function __construct()
     {
@@ -73,8 +73,8 @@ class BookController extends Controller
         $tid=$request->get('tid');
         $data=$this->handle->book_unit_list($tid);
         foreach($data as $value){
-            $value->choice_own=$this->handle->book_unit_choice($value->tid,$value->id);
-            $value->blank_own=$this->handle->book_unit_blank($value->tid,$value->id);
+            $value->choice_own=$this->handle->book_unit_question($value->tid,$value->id);
+            $value->blank_own=$this->handle->book_unit_question($value->tid,$value->id);
         }
         return response()->json([
             'data'=>$data
@@ -114,80 +114,80 @@ class BookController extends Controller
         ]);
     }
 
-    public function choice_list(Request $request){
+    public function question_list(Request $request){
         $tid=$request->get('tid');
         $sid=$request->get('sid');
         $page=$request->get('page');
         $limit=$request->get('limit');
-        $data=$this->handle->choice_list($tid,$sid,$page,$limit);
-        $total=$this->handle->choice_total($tid,$sid);
+        $data=$this->handle->question_list($tid,$sid,$page,$limit);
+        $total=$this->handle->question_total($tid,$sid);
         return response()->json([
             'data'=>$data,
             'total'=>$total
         ]);
     }
 
-    public function choice_add(Request $request){
+    public function question_add(Request $request){
         $data=$request->all();
-        $msg=$this->handle->choice_add($data);
+        $msg=$this->handle->question_add($data);
         return response()->json([
             'msg'=>$msg
         ]);
     }
 
-    public function choice_edit(Request $request){
+    public function question_edit(Request $request){
         $data=$request->all();
-        $msg=$this->handle->choice_edit($data);
+        $msg=$this->handle->question_edit($data);
         return response()->json([
             'msg'=>$msg
         ]);
     }
 
-    public function choice_del(Request $request){
+    public function question_del(Request $request){
         $id=$request->get('id');
-        $msg=$this->handle->choice_del($id);
+        $msg=$this->handle->question_del($id);
         return response()->json([
             'msg'=>$msg
         ]);
     }
 
-    public function blank_list(Request $request){
-        $tid=$request->get('tid');
-        $sid=$request->get('sid');
-        $page=$request->get('page');
-        $limit=$request->get('limit');
-        $data=$this->handle->blank_list($tid,$sid,$page,$limit);
-        $total=$this->handle->blank_total($tid,$sid);
-        return response()->json([
-            'data'=>$data,
-            'total'=>$total
-        ]);
-    }
-
-
-    public function blank_add(Request $request){
-        $data=$request->all();
-        $msg=$this->handle->blank_add($data);
-        return response()->json([
-            'msg'=>$msg
-        ]);
-    }
-
-    public function blank_edit(Request $request){
-        $data=$request->all();
-        $msg=$this->handle->blank_edit($data);
-        return response()->json([
-            'msg'=>$msg
-        ]);
-    }
-
-    public function blank_del(Request $request){
-        $id=$request->get('id');
-        $msg=$this->handle->blank_del($id);
-        return response()->json([
-            'msg'=>$msg
-        ]);
-    }
+//    public function blank_list(Request $request){
+//        $tid=$request->get('tid');
+//        $sid=$request->get('sid');
+//        $page=$request->get('page');
+//        $limit=$request->get('limit');
+//        $data=$this->handle->blank_list($tid,$sid,$page,$limit);
+//        $total=$this->handle->blank_total($tid,$sid);
+//        return response()->json([
+//            'data'=>$data,
+//            'total'=>$total
+//        ]);
+//    }
+//
+//
+//    public function blank_add(Request $request){
+//        $data=$request->all();
+//        $msg=$this->handle->blank_add($data);
+//        return response()->json([
+//            'msg'=>$msg
+//        ]);
+//    }
+//
+//    public function blank_edit(Request $request){
+//        $data=$request->all();
+//        $msg=$this->handle->blank_edit($data);
+//        return response()->json([
+//            'msg'=>$msg
+//        ]);
+//    }
+//
+//    public function blank_del(Request $request){
+//        $id=$request->get('id');
+//        $msg=$this->handle->blank_del($id);
+//        return response()->json([
+//            'msg'=>$msg
+//        ]);
+//    }
 
     public function task_list(Request $request){
         $page=$request->get('page');
@@ -240,8 +240,8 @@ class BookController extends Controller
             ]);
         }
         if(is_array($sid)){
+            $this->handle->mlistClear($uid,$sid,$type);
             if($type==1){
-                $this->handle->mlistClear($uid,$sid,$type);
                 $total=$this->handle->choice_array_total($sid,$this->threshold);
             }else{
                 $total=$this->handle->blank_array_total($sid,$this->threshold);
@@ -301,9 +301,9 @@ class BookController extends Controller
         $sid=$request->get('sid');
         $type=$request->get('type');
         $answer=$request->get('answer');
-//        $answer[0]['id']=6;
+//        $answer[0]['id']=2;
 //        $answer[0]['answer']=1;
-//        $answer[1]['id']=4;
+//        $answer[1]['id']=9;
 //        $answer[1]['answer']=1;
         $now=time();
 
@@ -315,6 +315,7 @@ class BookController extends Controller
         }
         $uid=$this->handle->uidGet($openid);
         $len=sizeof($answer);
+
         for ($i = 0; $i < $len; $i++) {
             $answerSid=$this->handle->sidGet($answer[$i]['id'],$type);
             $check = $this->handle->answer_check($answer[$i]['id'], $answer[$i]['answer'], $type);
@@ -325,8 +326,6 @@ class BookController extends Controller
             }
 
         }
-
-
         $this->handle->unit_mark_end($uid, $sid, $type, $now);
 
         $this->handle->scoreSet($uid, $sid, $type);
@@ -408,12 +407,16 @@ class BookController extends Controller
         $sid=json_decode($sid);
         $kid=$this->handle->taskKidGet();
         $type=$this->handle->taskTypeGet();
-        $this->handle->m_tlistClear($uid,$kid);
+
         $donecheck=$this->handle->taskDoneCheck($uid,$kid);
         $total=$this->handle->taskTotalGet($kid);
+
         if(!$donecheck){
             $this->handle->taskStart($uid,$kid);
+        }else{
+            $this->handle->m_tlistClear($uid,$kid);
         }
+
         $this->handle->taskRandom($type,$sid,$total,$uid,$kid);
         return response()->json([
             'msg'=>'success',
@@ -478,7 +481,7 @@ class BookController extends Controller
 
         $this->handle->taskScoreSet($uid,$kid);
 
-        $data['mistake'] = $this->handle->taskMistakeGet($uid, $kid,$type);
+        $data['mistake'] = $this->handle->taskMistakeGet($uid,$kid);
         $data['score'] = $this->handle->taskScoreGet($uid, $kid);
         $data['re_time'] = $this->handle->taskRetimeGet($uid, $kid);
         $data['shortest_time'] = $this->handle->taskShortestTimeGet($uid, $kid);
