@@ -45,8 +45,11 @@ trait RankHandle
         }
         if(isset($task[0])){
             $str=array("name"=>'特殊任务');
-
-            array_push($data,$str);
+            if($data) {
+                array_push($data, $str);
+            }else{
+                $data=$str;
+            }
         }
         return $data;
     }
@@ -64,6 +67,7 @@ trait RankHandle
         foreach($data as $key=>$value){
             $value->no=$key+1;
             $value->ave_time=$value->re_time;
+            $value->total_score=$value->score;
         }
         return $data;
     }

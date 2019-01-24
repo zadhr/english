@@ -178,6 +178,13 @@ trait TaskHandle
         ]);
     }
 
+    public function taskScoreClear($uid,$kid){
+       DB::table('task_score')
+           ->where('uid',$uid)
+           ->where('kid',$kid)
+           ->update(['num'=>0]);
+    }
+
     public function taskGet($uid,$kid,$type){
         $qid=DB::table('q_tlist')
             ->where('uid',$uid)
@@ -198,7 +205,7 @@ trait TaskHandle
                 ->where('id',$id)
                 ->select('id','choice1','choice2','choice3', 'choice4')
                 ->get();
-            $data[0]->question=DB::table('book_question')
+            $data[0]->word=DB::table('book_question')
                 ->where('id',$id)
                 ->value('word');
         }else{
@@ -206,7 +213,7 @@ trait TaskHandle
                 ->where('id',$id)
                 ->select('id','w_trans')
                 ->get();
-            $data[0]->question=$data[0]->w_trans;
+            $data[0]->word=$data[0]->w_trans;
         }
         $data[0]->limit=DB::table('task')
             ->where('id',$kid)
@@ -353,7 +360,7 @@ trait TaskHandle
             ->get();
         foreach ($answer as $key => $value) {
             $data[$key]['id'] = $value->id;
-            $data[$key]['words'] = $value->question;
+            $data[$key]['words'] = $value->word;
         }
 
         return $data;

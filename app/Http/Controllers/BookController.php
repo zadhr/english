@@ -420,6 +420,7 @@ class BookController extends Controller
             $this->handle->taskStart($uid,$kid);
         }else{
             $this->handle->m_tlistClear($uid,$kid);
+            $this->handle->taskScoreClear($uid,$kid);
         }
 
         $this->handle->taskRandom($type,$sid,$total,$uid,$kid);
@@ -460,6 +461,10 @@ class BookController extends Controller
     public function taskFinish(Request $request){
         $token=$request->get('token');
         $answer=$request->get('answer');
+//        $answer[0]['id']=1;
+//        $answer[0]['answer']=0;
+//        $answer[1]['id']=2;
+//        $answer[1]['answer']=0;
         $now=time();
         $openid=$this->handle->token_check($token);
         if(!$openid){
@@ -470,7 +475,7 @@ class BookController extends Controller
         $uid=$this->handle->uidGet($openid);
         $type=$this->handle->taskTypeGet();
         $kid=$this->handle->taskKidGet();
-//        $sid=$this->handle->tasksidGet();
+     //   $sid=$this->handle->tasksidGet();
 
         $len=sizeof($answer);
         for($i=0;$i<$len;$i++){
