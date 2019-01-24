@@ -9,9 +9,9 @@ use Illuminate\Support\Facades\Redis;
 
 class SystemController extends Controller
 {
-    private $appId='wx30e4351e3fab2266';
-    private $appSecret='efccfa22b12b1dbf63381e7ebbe81a87';
-    private $url='pages/index/index';
+    private $appId='';
+    private $appSecret='';
+    private $url='';
     private $radio=75;
     private $handle;
 
