@@ -239,15 +239,17 @@ class BookController extends Controller
                 'msg'=>'所选单元缺题！'
             ]);
         }
+        $this->handle->mlistClear($uid,$sid,$type);
+
         if(is_array($sid)){
-            $this->handle->mlistClear($uid,$sid,$type);
+
             if($type==1){
                 $total=$this->handle->choice_array_total($sid,$this->threshold);
             }else{
                 $total=$this->handle->blank_array_total($sid,$this->threshold);
             }
         }else {
-            $this->handle->mlistClear($uid, $sid, $type);
+
             if ($type == 1) {
                 $total = $this->handle->choice_question_total($sid);
             } else {
@@ -257,6 +259,8 @@ class BookController extends Controller
         $check=$this->handle->unit_check($uid,$sid,$type);
         if(!$check){
             $this->handle->unit_mark_start($uid,$sid,$type);
+        }else{
+            $this->handle->unitScoreClear($uid,$sid,$type);
         }
 
 
@@ -499,5 +503,6 @@ class BookController extends Controller
            'msg'=>$msg
         ]);
     }
+
 }
 

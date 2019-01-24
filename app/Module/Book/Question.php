@@ -269,6 +269,17 @@ trait QuestionHandle
         }
     }
 
+    public function unitScoreClear($uid,$sid,$type){
+         if(is_array($sid)){
+             $sid=json_encode($sid);
+         }
+        DB::table('units_score')
+            ->where('sid',$sid)
+            ->where('uid',$uid)
+            ->where('type',$type)
+            ->update(['num'=>0]);
+    }
+
     public function unit_mark_end($uid,$sid,$state,$now){
         if(is_array($sid)){
             $sid=json_encode($sid);
@@ -473,6 +484,13 @@ trait QuestionHandle
                 ->where('sid',$sid)
                 ->where('type',$type)
                 ->value('num');
+            //数量清0
+            DB::table('unit_score')
+                ->where('uid',$uid)
+                ->where('sid',$sid)
+                ->where('type',$type)
+                ->update(['num'=>0]);
+
             if($num==$total){
                 $fullPoint=DB::table('point_get')
                     ->where('id',2)
@@ -486,6 +504,7 @@ trait QuestionHandle
                     ->update(['point'=>$point]);
             }
             $score=number_format($num/$total*100,1);
+
             DB::table('unit_score')
                 ->where('uid',$uid)
                 ->where('sid',$sid)
@@ -710,6 +729,11 @@ trait QuestionHandle
         }
     }
 
+    /**
+     * 排行榜总分
+     * @param $uid
+     * @param $tid
+     */
     public function total_score($uid,$tid){
         $score=DB::table('unit_score')
             ->where('uid',$uid)
