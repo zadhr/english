@@ -19,7 +19,7 @@ trait QuestionHandle
             ->where('sid',$sid)
             ->limit($limit)
             ->offset(($page - 1) * $limit)
-            ->select('id','word','choice1','choice2','choice3','choice4','place','example','trans','w_trans','type')
+            ->select('id','word','choice1','choice2','choice3','choice4','place','example','trans','w_trans','type','answer')
             ->get();
         return $data;
     }
@@ -44,7 +44,7 @@ trait QuestionHandle
             ->where('id',$data['id'])
             ->update([
                 'word'=>$data['word'],'choice1'=>$data['choice1'],'choice2'=>$data['choice2'],
-                'choice3'=>$data['choice3'],'choice4'=>$data['choice4'],'place'=>$data['place'],
+                'choice3'=>$data['choice3'],'choice4'=>$data['choice4'],'place'=>$data['place'],'answer'=>$data['answer'],
                 'example'=>$data['example'],'trans'=>$data['trans'],'w_trans'=>$data['w_trans'],'type'=>$data['type']
             ]);
         $msg=$res==true?'success':'fail';
@@ -76,11 +76,13 @@ trait QuestionHandle
                 ->pluck('id');
         }
         $question=json_encode($question);
+//        dump($question);
         $check=DB::table('q_list')
             ->where('uid',$uid)
             ->where('sid',$sid)
             ->where('type',$type)
             ->value('id');
+//        dump($check);
         if($check){
             DB::table('q_list')
                 ->where('uid',$uid)
@@ -333,24 +335,9 @@ trait QuestionHandle
      */
     public function answer_check($id,$answer,$type){
         if($type==1) {
-            $trans = DB::table('book_question')
+            $correct_answer = DB::table('book_question')
                 ->where('id', $id)
-                ->value('w_trans');
-            $choices=DB::table('book_question')
-                ->where('id',$id)
-                ->select('choice1','choice2','choice3','choice4')
-                ->get();
-            if($trans==$choices[0]->choice1){
-                $correct_answer=0;
-            }elseif($trans==$choices[0]->choice2){
-                $correct_answer=1;
-            }elseif($trans==$choices[0]->choice3){
-                $correct_answer=2;
-            }elseif($trans==$choices[0]->choice4){
-                $correct_answer=3;
-            }else{
-                $correct_answer=4;
-            }
+                ->value('answer');
         }else{
             $correct_answer = DB::table('book_question')
                 ->where('id', $id)

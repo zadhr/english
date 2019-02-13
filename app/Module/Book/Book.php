@@ -152,8 +152,7 @@ trait BookHandle
                 'unit'=>$unit,'choice_limit'=>$choice_limit,'choice_num'=>$choice_num,
                 'blank_limit'=>$blank_limit,'blank_num'=>$blank_num
             ]);
-        $msg=$res==true?'success':'fail';
-        return $msg;
+        return 'success';
     }
 
     public function book_unit_del($id){
