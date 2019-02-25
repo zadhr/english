@@ -570,7 +570,7 @@ trait QuestionHandle
         $data=DB::table('book_question')
             ->where('id',$id)
             ->select('place','example',
-                'trans','w_trans')
+                'trans','w_trans','type')
             ->get();
         $answer=DB::table('book_question')->where('id',$id)->value('word');
 
