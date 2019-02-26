@@ -225,6 +225,11 @@ class BookController extends Controller
         $sid=$request->get('sid');
         $token=$request->get('token');
         $type=$request->get('type');
+
+        if(sizeof($sid)==1){
+            $sid=$sid[0];
+        }
+
         $openid=$this->handle->token_check($token);
         if(!$openid){
             return response()->json([
@@ -280,6 +285,11 @@ class BookController extends Controller
         $sid=$request->get('sid');
         $token=$request->get('token');
         $type=$request->get('type');
+
+        if(sizeof($sid)==1){
+            $sid=$sid[0];
+        }
+
         $openid=$this->handle->token_check($token);
         if(!$openid){
             return response()->json([
@@ -305,6 +315,11 @@ class BookController extends Controller
         $sid=$request->get('sid');
         $type=$request->get('type');
         $answer=$request->get('answer');
+
+        if(sizeof($sid)==1){
+            $sid=$sid[0];
+        }
+
 //        $answer[0]['id']=1;
 //        $answer[0]['answer']='success';
 //        $answer[1]['id']=2;
@@ -331,6 +346,7 @@ class BookController extends Controller
             }
 
         }
+
         $this->handle->unit_mark_end($uid, $sid, $type, $now);
 
         $this->handle->scoreSet($uid, $sid, $type);
@@ -506,6 +522,27 @@ class BookController extends Controller
         $msg=$this->handle->taskCheck();
         return response()->json([
            'msg'=>$msg
+        ]);
+    }
+
+    public function bookGet_New(Request $request){
+        $id=$request->id;
+        if(!$id){
+            return response()->json([
+               'msg'=>'fail'
+            ]);
+        }
+
+        $data=$this->handle->bookGet_New($id);
+        foreach($data as $value){
+            $value->unit=$this->handle->unitGet_New($value->id);
+            foreach($value->unit as $val){
+                $val->selected=false;
+            }
+        }
+
+        return response()->json([
+           'data'=>$data
         ]);
     }
 

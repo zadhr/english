@@ -189,4 +189,41 @@ trait BookHandle
         $data=DB::table('grade')->get();
         return $data;
     }
+
+    public function bookGet_New($id){
+        switch($id){
+            case 1:
+                $data=DB::table('book_title')
+                    ->where('gid','>=',1)
+                    ->where('gid','<=',6)
+                    ->orderby('gid','ASC')
+                    ->select('id','name')
+                    ->get();
+                break;
+            case 2:
+                $data=DB::table('book_title')
+                    ->where('gid','>=',7)
+                    ->where('gid','<=',9)
+                    ->orderby('gid','ASC')
+                    ->select('id','name')
+                    ->get();
+                break;
+            case 3:
+                $data=DB::table('book_title')
+                    ->where('gid','=',10)
+                    ->orderby('gid','ASC')
+                    ->select('id','name')
+                    ->get();
+                break;
+        }
+        return $data;
+    }
+
+    public function unitGet_New($tid){
+        $unit=DB::table('book_system')
+            ->where('tid',$tid)
+            ->get();
+
+        return $unit;
+    }
 }

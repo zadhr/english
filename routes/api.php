@@ -57,7 +57,7 @@ Route::get('rank','RankController@RankGradeGet');
 Route::get('rankTask','RankController@RankTask');
 
 Route::get('GradeGet','BookController@gradeGet');
-Route::get('BookGet','BookController@bookGet');
+Route::get('BookGet','BookController@bookGet_New');
 //Route::get('UnitGet','BookController@unitGet');
 
 Route::post('taskRandom','BookController@taskRandom');
