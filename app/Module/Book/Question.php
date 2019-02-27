@@ -139,7 +139,7 @@ trait QuestionHandle
             $data=DB::table('book_question')
                 ->leftJoin('book_system','book_question.sid','=','book_system.id')
                 ->where('book_question.id',$qid)
-                ->select('book_system.blank_limit','book_question.id','book_question.w_trans')
+                ->select('book_system.blank_limit','book_question.id','book_question.w_trans','book_question.type')
                 ->get();
             $data[0]->limit=$data[0]->blank_limit;
         }

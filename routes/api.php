@@ -36,7 +36,7 @@ Route::post('order/detail','GiftController@order_detail');
 Route::post('exchange','GiftController@exchange');
 
 Route::post('mistake','UserinfoController@mistake_list');
-Route::delete('mistake','UserinfoController@mistake_del');
+Route::delete('mistake','UserinfoController@mistakeDel');
 Route::get('mistake','UserinfoController@mistake_find');
 Route::post('mistake/add','UserinfoController@mistake_add');
 Route::post('mistake/Add','UserinfoController@user_mistake_add');

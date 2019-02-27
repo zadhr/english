@@ -77,6 +77,11 @@ trait TaskHandle
         }
     }
 
+    public function tasknameGet(){
+        $name=DB::table('task')->value('name');
+        return $name;
+    }
+
     /**
      * 任务随机出题
      * @param $type
@@ -211,7 +216,7 @@ trait TaskHandle
         }else{
             $data=DB::table('book_question')
                 ->where('id',$id)
-                ->select('id','w_trans')
+                ->select('id','w_trans','type')
                 ->get();
             $data[0]->word=$data[0]->w_trans;
         }

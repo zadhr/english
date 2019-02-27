@@ -7,8 +7,8 @@ use App\Module\user;
 
 class UserinfoController extends Controller
 {
-    private $appId='';
-    private $appSecret='';
+    private $appId='wx30e4351e3fab2266';
+    private $appSecret='efccfa22b12b1dbf63381e7ebbe81a87';
 
     private $handle;
 
@@ -164,22 +164,6 @@ class UserinfoController extends Controller
         ]);
     }
 
-    public function mistake_del(Request $request){
-        $token=$request->get('token');
-        $id=$request->get('id');
-        $openid=$this->handle->token_check($token);
-        if(!$openid){
-            return response()->json([
-                'msg'=>'登录验证失败'
-            ]);
-        }
-        $uid=$this->handle->uidGet($openid);
-        $msg=$this->handle->mistake_del($id,$uid);
-        return response()->json([
-            'msg'=>$msg
-        ]);
-    }
-
     /**
      * 词查找
      * @param Request $request
@@ -224,6 +208,27 @@ class UserinfoController extends Controller
         $msg=$this->handle->user_mistake_add($id,$type,$uid,$now);
         return response()->json([
            'msg'=>$msg
+        ]);
+    }
+
+    /**
+     * 错题本删除
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function mistakeDel(Request $request){
+        $token=$request->token;
+        $id=$request->id;
+
+        $openid=$this->handle->token_check($token);
+        if(!$openid){
+            return response()->json([
+                'msg'=>'登录验证失败'
+            ]);
+        }
+        $this->handle->user_mistake_del($id);
+        return response()->json([
+           'msg'=>'success'
         ]);
     }
 }

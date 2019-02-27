@@ -142,15 +142,6 @@ trait UserinfoHandle
         }
     }
 
-    public function mistake_del($id,$uid){
-        $res=DB::table('mistake')
-            ->where('uid',$uid)
-            ->where('id',$id)
-            ->delete();
-        $msg=$res==true?'success':'fail';
-        return $msg;
-    }
-
     public function mistake_add($uid,$mistake){
         $now=date('Y-m-d H:i:s');
         $res=DB::table('mistake')->insert([
@@ -205,5 +196,15 @@ trait UserinfoHandle
             'uid'=>$uid,'words'=>$words,'sid'=>$sid,'type'=>$type,'date'=>$now,'state'=>2
         ]);
         return 'success';
+    }
+
+    public function user_mistake_del($id){
+        if(is_array($id)&&sizeof($id)==1){
+            $id=$id[0];
+            DB::table('mistake')->where('id',$id)->delete();
+        }else{
+            DB::table('mistake')->whereIn('id',$id)->delete();
+        }
+       return true;
     }
 }

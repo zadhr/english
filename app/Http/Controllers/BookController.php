@@ -520,6 +520,13 @@ class BookController extends Controller
 
     public function taskCheck(){
         $msg=$this->handle->taskCheck();
+        if($msg){
+            $name=$this->handle->tasknameGet();
+            return response()->json([
+               'msg'=>$msg,
+                'data'=>$name
+            ]);
+        }
         return response()->json([
            'msg'=>$msg
         ]);
@@ -545,6 +552,7 @@ class BookController extends Controller
            'data'=>$data
         ]);
     }
+
 
 }
 
