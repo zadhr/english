@@ -60,7 +60,9 @@ trait UserinfoHandle
             ->offset(($page - 1) * $limit)
             ->select('words','date','id')
             ->get();
-
+         foreach($data as $value){
+             $value->checked=false;
+         }
         return $data;
     }
 
